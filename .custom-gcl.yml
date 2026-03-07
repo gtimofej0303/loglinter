@@ -2,4 +2,4 @@
 version: v2.10.1
 plugins:
   - module: 'github.com/gtimofej0303/loglinter'
-    version: v0.1.0
+    path: .

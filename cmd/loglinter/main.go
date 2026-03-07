@@ -26,4 +26,8 @@ func main() {
 	logger.Info("connection failed???")
 	logger.Info("user admin logged in @ root")
 	logger.Info("done ✅")
+
+	// Кастомные нарушения
+	logger.Debug("secreT")
+	logger.Error("Credit Card")
 }

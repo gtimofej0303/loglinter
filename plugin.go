@@ -7,8 +7,8 @@ import (
 )
 
 type Settings struct{
-	ForbiddenPatterns []string `mapstructure:"forbidden-patterns"`
-    ForbiddenWords    []string `mapstructure:"forbidden-words"`
+	Patterns []string `mapstructure:"patterns"`
+    Words    []string `mapstructure:"words"`
 }
 
 type plugin struct{
@@ -16,7 +16,7 @@ type plugin struct{
 }
 
 func (p *plugin) BuildAnalyzers() ([]*analysis.Analyzer, error) {
-	a := analyzer.NewAnalyzer(p.settings.ForbiddenPatterns, p.settings.ForbiddenWords)
+	a := analyzer.NewAnalyzer(p.settings.Patterns, p.settings.Words)
 	return []*analysis.Analyzer{a}, nil
 }
 
@@ -24,12 +24,35 @@ func (p *plugin) GetLoadMode() string {
 	return register.LoadModeSyntax
 }
 
-func New(settings any) (register.LinterPlugin, error) {
-	s, err := register.DecodeSettings[Settings](settings)
-	if err != nil{
-		return nil, err
-	}
-	return &plugin{settings: s}, nil
+func New(raw any) (register.LinterPlugin, error) {
+    m, ok := raw.(map[string]any)
+    if !ok {
+        return &plugin{settings: Settings{}}, nil
+    }
+
+    var s Settings
+
+    if rawPatterns, ok := m["patterns"]; ok {
+        if arr, ok := rawPatterns.([]any); ok {
+            for _, v := range arr {
+                if str, ok := v.(string); ok {
+                    s.Patterns = append(s.Patterns, str)
+                }
+            }
+        }
+    }
+
+    if rawWords, ok := m["words"]; ok {
+        if arr, ok := rawWords.([]any); ok {
+            for _, v := range arr {
+                if str, ok := v.(string); ok {
+                    s.Words = append(s.Words, str)
+                }
+            }
+        }
+    }
+
+    return &plugin{settings: s}, nil
 }
 
 func init() {
