@@ -10,7 +10,7 @@ import (
 // Список чувствительных ключевых слов
 var sensitiveKeywords = []string{
 	"password",
-	"pass",
+	" pass ",
 	"passwd",
 	"token",
 	"apikey",

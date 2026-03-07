@@ -1,11 +1,14 @@
 package rules
 
 import (
-    "go/token"
-    "unicode"
+	"go/token"
+	"strings"
+	"unicode"
 
-    "golang.org/x/tools/go/analysis"
+	"golang.org/x/tools/go/analysis"
 )
+
+const forbidden = "!?#@$%^&*."
 
 func CheckSpecialChars(pass *analysis.Pass, msg string, pos token.Pos) {
     for _, r := range msg {
@@ -14,7 +17,7 @@ func CheckSpecialChars(pass *analysis.Pass, msg string, pos token.Pos) {
             return
         }
 
-        if (r == '!') || (r == '?') || (r == '#') || (r == '@') || (r == '$') || (r == '%') || (r == '^') || (r == '&') || (r == '*') {
+        if strings.ContainsRune(forbidden, r){
             pass.Reportf(pos, "log message must not contain special characters: %q", msg)
             return
         }

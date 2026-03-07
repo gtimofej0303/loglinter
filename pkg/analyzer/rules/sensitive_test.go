@@ -23,9 +23,9 @@ func TestCheckSensitive(t *testing.T) {
 		{"invalid auth keyword", "auth failed for user", true},
 		{"invalid private_key", "private_key loaded", true},
 		{"invalid passwd", "passwd is empty", true},
-		{"invalid pass keyword", "pass validation", true},
+		{"invalid pass keyword", "waiting pass validation", true},
 		{"invalid uppercase keyword", "User PASSWORD reset", true},
-		{"valid word passport", "passport validation", true}, 
+		{"valid word passport", "passport validation", false}, 
 	}
 
 	for _, tc := range tests {

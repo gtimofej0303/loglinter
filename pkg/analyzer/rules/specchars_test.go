@@ -14,7 +14,7 @@ func TestCheckSpecialChars(t *testing.T) {
 		wantErr bool
 	}{
 		{"valid clean message", "user logged in", false},
-		{"valid with comma and dot", "connected, loading data.", false},
+		{"valid with comma", "connected, loading data", false},
 		{"valid with dash", "request timed-out", false},
 		{"valid with colon", "error: connection refused", false},
 		{"invalid exclamation mark", "success!", true},
@@ -28,6 +28,7 @@ func TestCheckSpecialChars(t *testing.T) {
 		{"invalid asterisk", "2 * 2", true},
 		{"invalid emoji", "🎉", true},
 		{"invalid math symbol", "∑", true},
+		{"invalid dot", "something went wrong...", true},
 	}
 
 	for _, tc := range tests {

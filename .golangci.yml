@@ -1,0 +1,12 @@
+# .golangci.yml
+version: "2"
+
+linters:
+  default: none
+  enable:
+    - loglinter
+  settings:
+    custom:
+      loglinter:
+        type: "module"
+        description: Checks log messages.
