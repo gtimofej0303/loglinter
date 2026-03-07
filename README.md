@@ -9,7 +9,7 @@
 | 1 | Сообщение должно начинаться со строчной буквы | `"Hello"` | `"hello"` |
 | 2 | Только английские буквы | `"ошибка"` | `"error"` |
 | 3 | Нет спецсимволов и emoji | `"cool!"`, `"done ✅"` | `"cool"`, `"done"` |
-| 4 | Нет секретных данныхㅤ (`password`, `token` и др.) | `"password changed"` | `"user data updated"` |
+| 4 | Нет секретных данных (`password`, `token` и др.) | `"password changed"` | `"user data updated"` |
 
 ## Требования
 
@@ -122,8 +122,8 @@ go test ./pkg/analyzer/...
 
 `password`, `passwd`, `pass`, `token`, `apikey`, `api_key`, `secret`, `private_key`, `auth`
 
-> Примечание
-Cлово passport не считается нарушением — проверка на " pass " (с пробелами) исключает его из ложных срабатываний.
+> Примечание:
+слово passport не считается нарушением — проверка на " pass " (с пробелами) исключает его из ложных срабатываний.
 
 ## Интеграция в проект
 ### 1. Установить golangci-lint
@@ -164,5 +164,5 @@ golangci-lint custom
 ./custom-gcl run ./...
 ```
 
-> Примечание
-Команда golangci-lint custom читает .custom-gcl.yml и автоматически подтягивает плагин как Go-модуль — устанавливать loglinter отдельно не нужно.
+> Примечание:
+команда golangci-lint custom читает .custom-gcl.yml и автоматически подтягивает плагин как Go-модуль — устанавливать loglinter отдельно не нужно.
