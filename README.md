@@ -168,3 +168,18 @@ golangci-lint custom
 
 > Примечание:
 команда golangci-lint custom читает .custom-gcl.yml и автоматически подтягивает плагин как Go-модуль — устанавливать loglinter отдельно не нужно.
+
+## Кастомные паттерны
+
+Вы можете задать свои запрещённые слова и regexp-паттерны в `.golangci.yml`:
+
+```yaml
+linters-settings:
+  custom:
+    loglinter:
+      settings:
+        forbidden-patterns:
+          - "credit.?card" #Пример
+        forbidden-words:
+          - "internal" #Пример
+```

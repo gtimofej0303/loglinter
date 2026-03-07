@@ -10,3 +10,11 @@ linters:
       loglinter:
         type: "module"
         description: Checks log messages.
+        settings:
+        forbidden-patterns:
+          - "credit.?card"
+          - "social.?security"
+        forbidden-words:
+          - "internal"
+          - "ssn"
+          - "debug_mode"

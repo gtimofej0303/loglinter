@@ -12,12 +12,26 @@ import (
 	"golang.org/x/tools/go/ast/inspector"
 )
 
-var Analyzer = &analysis.Analyzer{
-	Name: 		"loglinter",
-	Doc: 		"Checks that log messages follow formatting rules",
-	Run: 		run, 
-	Requires: 	[]*analysis.Analyzer{inspect.Analyzer},
+type runner struct {
+    extraPatterns []string
+    extraWords    []string
 }
+
+func NewAnalyzer(extraPatterns []string, extraWords []string) *analysis.Analyzer {
+    r := &runner{
+        extraPatterns: extraPatterns,
+        extraWords:    extraWords,
+    }
+
+    return &analysis.Analyzer{
+        Name:     "loglinter",
+        Doc:      "Checks that log messages follow formatting rules",
+        Run:      r.run,
+        Requires: []*analysis.Analyzer{inspect.Analyzer},
+    }
+}
+
+var Analyzer = NewAnalyzer(nil, nil)
 
 var loggerPkgs = map[string] bool{
 	"slog": true,
@@ -25,7 +39,7 @@ var loggerPkgs = map[string] bool{
 	"log": 	true,
 }
 
-func run(pass *analysis.Pass) (interface{}, error){
+func (r *runner) run(pass *analysis.Pass) (interface{}, error){
 	insp := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
 
 	nodeFilter := []ast.Node{
@@ -47,6 +61,10 @@ func run(pass *analysis.Pass) (interface{}, error){
         rules.CheckEnglish(pass, msg, pos)
         rules.CheckSpecialChars(pass, msg, pos)
         rules.CheckSensitive(pass, msg, pos)
+
+		if len(r.extraPatterns) > 0 || len(r.extraWords) > 0 {
+            rules.CheckCustom(pass, msg, pos, r.extraPatterns, r.extraWords)
+        }
 	})
 
 	return nil, nil
