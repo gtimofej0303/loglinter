@@ -187,5 +187,5 @@ linters:
           words:
               - "secret" #Пример
           patterns:
-            - "credit.?card" #Пример
+              - "credit.?card" #Пример
 ```
