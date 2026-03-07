@@ -6,12 +6,12 @@ import (
 	"golang.org/x/tools/go/analysis"
 )
 
-type Settings struct{
+type Settings struct {
 	Patterns []string `mapstructure:"patterns"`
-    Words    []string `mapstructure:"words"`
+	Words    []string `mapstructure:"words"`
 }
 
-type plugin struct{
+type plugin struct {
 	settings Settings
 }
 
@@ -25,34 +25,34 @@ func (p *plugin) GetLoadMode() string {
 }
 
 func New(raw any) (register.LinterPlugin, error) {
-    m, ok := raw.(map[string]any)
-    if !ok {
-        return &plugin{settings: Settings{}}, nil
-    }
+	m, ok := raw.(map[string]any)
+	if !ok {
+		return &plugin{settings: Settings{}}, nil
+	}
 
-    var s Settings
+	var s Settings
 
-    if rawPatterns, ok := m["patterns"]; ok {
-        if arr, ok := rawPatterns.([]any); ok {
-            for _, v := range arr {
-                if str, ok := v.(string); ok {
-                    s.Patterns = append(s.Patterns, str)
-                }
-            }
-        }
-    }
+	if rawPatterns, ok := m["patterns"]; ok {
+		if arr, ok := rawPatterns.([]any); ok {
+			for _, v := range arr {
+				if str, ok := v.(string); ok {
+					s.Patterns = append(s.Patterns, str)
+				}
+			}
+		}
+	}
 
-    if rawWords, ok := m["words"]; ok {
-        if arr, ok := rawWords.([]any); ok {
-            for _, v := range arr {
-                if str, ok := v.(string); ok {
-                    s.Words = append(s.Words, str)
-                }
-            }
-        }
-    }
+	if rawWords, ok := m["words"]; ok {
+		if arr, ok := rawWords.([]any); ok {
+			for _, v := range arr {
+				if str, ok := v.(string); ok {
+					s.Words = append(s.Words, str)
+				}
+			}
+		}
+	}
 
-    return &plugin{settings: s}, nil
+	return &plugin{settings: s}, nil
 }
 
 func init() {

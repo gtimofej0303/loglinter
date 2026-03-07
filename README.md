@@ -174,12 +174,18 @@ golangci-lint custom
 Вы можете задать свои запрещённые слова и regexp-паттерны в `.golangci.yml`:
 
 ```yaml
-linters-settings:
-  custom:
-    loglinter:
-      settings:
-        forbidden-patterns:
-          - "credit.?card" #Пример
-        forbidden-words:
-          - "internal" #Пример
+linters:
+  default: none
+  enable:
+    - loglinter
+  settings:
+    custom:
+      loglinter:
+        type: module
+        description: Checks log messages.
+        settings:
+          words:
+              - "secret" #Пример
+          patterns:
+            - "credit.?card" #Пример
 ```
