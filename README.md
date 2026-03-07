@@ -1,5 +1,7 @@
 # loglinter
 
+![CI](https://github.com/gtimofej0303/loglinter/actions/workflows/ci.yml/badge.svg)
+
 `loglinter` — статический анализатор Go, реализованный как плагин для [golangci-lint](https://golangci-lint.run/). Проверяет сообщения в вызовах логгеров (`slog`, `zap`, `log`, `logger`) на соответствие набору правил форматирования.
 
 ## Правила
