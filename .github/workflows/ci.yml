@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+    branches: [ "**" ]
+
+jobs:
+  build-and-test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Получаем код репозитория
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Устанавливаем Go нужной версии
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+      
+      # 3. Кэшируем зависимости
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      
+      # 4. Загружаем зависимости
+      - name: Download dependencies
+        run: go mod download
+
+      # 5. Проверяем, что go.mod и go.sum актуальны
+      - name: Verify dependencies
+        run: go mod verify
+
+      # 6. Сборка проекта
+      - name: Build
+        run: go build ./...
+
+      # 7. Запуск тестов с покрытием
+      - name: Run tests
+        run: |
+          go test -v -race -coverprofile=coverage.out \
+            ./pkg/analyzer \
+            ./pkg/analyzer/rules
+
+      # 8. Вывод % покрытия в лог
+      - name: Show coverage
+        run: go tool cover -func=coverage.out
