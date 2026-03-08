@@ -30,7 +30,7 @@ func TestCheckCustom(t *testing.T) {
             pass := &analysis.Pass{
                 Report: func(d analysis.Diagnostic) { reported = true },
             }
-            CheckCustom(pass, tc.msg, token.NoPos, tc.patterns, tc.words)
+            CheckCustom(pass, tc.msg, token.NoPos, tc.patterns)
             if reported != tc.wantErr {
                 t.Errorf("CheckCustom(%q) reported=%v, want %v", tc.msg, reported, tc.wantErr)
             }

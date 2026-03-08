@@ -7,6 +7,14 @@ import (
 )
 
 type Settings struct {
+    Enabled bool `mapstructure:"enabled"`
+
+    EnableLowercase   *bool `mapstructure:"enable_lowercase"`
+    EnableEnglish     *bool `mapstructure:"enable_english"`
+    EnableSpecChars   *bool `mapstructure:"enable_specchars"`
+    EnableSensitive   *bool `mapstructure:"enable_sensitive"`
+    EnableCustom      *bool `mapstructure:"enable_custom"`
+
 	Patterns []string `mapstructure:"patterns"`
 	Words    []string `mapstructure:"words"`
 }
@@ -16,8 +24,30 @@ type plugin struct {
 }
 
 func (p *plugin) BuildAnalyzers() ([]*analysis.Analyzer, error) {
-	a := analyzer.NewAnalyzer(p.settings.Patterns, p.settings.Words)
+	if !p.settings.Enabled {
+        return nil, nil
+    }
+
+	cfg := analyzer.Config{
+        EnableLowercase: boolOrDefault(p.settings.EnableLowercase, true),
+        EnableEnglish:   boolOrDefault(p.settings.EnableEnglish, true),
+        EnableSpecChars: boolOrDefault(p.settings.EnableSpecChars, true),
+        EnableSensitive: boolOrDefault(p.settings.EnableSensitive, true),
+        EnableCustom:    boolOrDefault(p.settings.EnableCustom, false),
+
+        ExtraPatterns: p.settings.Patterns,
+        ExtraWords:    p.settings.Words,
+    }
+
+	a := analyzer.NewAnalyzer(cfg)
 	return []*analysis.Analyzer{a}, nil
+}
+
+func boolOrDefault(v *bool, def bool) bool {
+    if v == nil {
+        return def
+    }
+    return *v
 }
 
 func (p *plugin) GetLoadMode() string {
@@ -31,6 +61,27 @@ func New(raw any) (register.LinterPlugin, error) {
 	}
 
 	var s Settings
+
+	if v, ok := m["enabled"].(bool); ok {
+		s.Enabled = v
+	} else {
+		s.Enabled = true //default
+	}
+
+	parseBoolPtr := func(key string) *bool{
+		if v, ok := m[key]; ok{
+			if b, ok := v.(bool); ok {
+				return &b
+			}
+		}
+		return nil
+	}
+
+	s.EnableLowercase = parseBoolPtr("enable_lowercase")
+    s.EnableEnglish = parseBoolPtr("enable_english")
+    s.EnableSpecChars = parseBoolPtr("enable_specchars")
+    s.EnableSensitive = parseBoolPtr("enable_sensitive")
+    s.EnableCustom = parseBoolPtr("enable_custom")
 
 	if rawPatterns, ok := m["patterns"]; ok {
 		if arr, ok := rawPatterns.([]any); ok {

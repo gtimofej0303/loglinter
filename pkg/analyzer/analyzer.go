@@ -12,16 +12,23 @@ import (
 	"golang.org/x/tools/go/ast/inspector"
 )
 
-type runner struct {
-    extraPatterns []string
-    extraWords    []string
+type Config struct {
+    EnableLowercase bool
+    EnableEnglish   bool
+    EnableSpecChars bool
+    EnableSensitive bool
+    EnableCustom    bool
+
+    ExtraPatterns []string
+    ExtraWords    []string
 }
 
-func NewAnalyzer(extraPatterns []string, extraWords []string) *analysis.Analyzer {
-    r := &runner{
-        extraPatterns: extraPatterns,
-        extraWords:    extraWords,
-    }
+type runner struct {
+    cfg Config
+}
+
+func NewAnalyzer(cfg Config) *analysis.Analyzer {
+    r := &runner{cfg: cfg}
 
     return &analysis.Analyzer{
         Name:     "loglinter",
@@ -31,7 +38,13 @@ func NewAnalyzer(extraPatterns []string, extraWords []string) *analysis.Analyzer
     }
 }
 
-var Analyzer = NewAnalyzer(nil, nil)
+var Analyzer = NewAnalyzer(Config{
+    EnableLowercase: true,
+    EnableEnglish:   true,
+    EnableSpecChars: true,
+    EnableSensitive: true,
+    EnableCustom:    false,
+})
 
 var loggerPkgs = map[string] bool{
 	"slog": true,
@@ -57,13 +70,23 @@ func (r *runner) run(pass *analysis.Pass) (interface{}, error){
             return
         }
 
-		rules.CheckLowercase(pass, msg, pos)
-        rules.CheckEnglish(pass, msg, pos)
-        rules.CheckSpecialChars(pass, msg, pos)
-        rules.CheckSensitive(pass, msg, pos)
 
-		if len(r.extraPatterns) > 0 || len(r.extraWords) > 0 {
-            rules.CheckCustom(pass, msg, pos, r.extraPatterns, r.extraWords)
+        if r.cfg.EnableLowercase {
+            rules.CheckLowercase(pass, msg, pos)
+        }
+        if r.cfg.EnableEnglish {
+            rules.CheckEnglish(pass, msg, pos)
+        }
+        if r.cfg.EnableSpecChars {
+            rules.CheckSpecialChars(pass, msg, pos)
+        }
+        if r.cfg.EnableSensitive {
+            rules.CheckSensitiveWithExtra(pass, msg, pos, r.cfg.ExtraWords)
+        }
+
+
+		if r.cfg.EnableCustom && (len(r.cfg.ExtraPatterns) > 0 || len(r.cfg.ExtraWords) > 0) {
+            rules.CheckCustom(pass, msg, pos, r.cfg.ExtraPatterns)
         }
 	})
 

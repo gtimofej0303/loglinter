@@ -56,15 +56,22 @@ linters:
   settings:
     custom:
       loglinter:
-        type: "module"
+        type: module
         description: Checks log messages.
-```
-**Конфигурация .custom-gcl.yml**
-```yml
-version: v2.10.1
-plugins:
-  - module: 'github.com/gtimofej0303/loglinter'
-    version: v0.1.0
+        settings:
+          enabled: true # Включение/выключение плагина
+          enable_lowercase:   true # Включение/выключение правила о больших буквах
+          enable_english:     true # Включение/выключение правила об английских буквах
+          enable_specchars:   true # Включение/выключение правила о спец символах
+          enable_sensitive:   true # Включение/выключение правила о чувствительных данных
+          enable_custom:      true # Включение/выключение кастомных паттернов
+          words: # Дополнительные чувствительные ключевые слова
+            - "internal"
+            - "secret"
+            - "debug_mode"
+          patterns: # Кастомные паттерны
+            - "credit.?card"
+            - "social.?security"
 ```
 
 ## Поддерживаемые логгеры
@@ -80,7 +87,7 @@ plugins:
 
 Поддерживаемые методы: `Info`, `Error`, `Warn`, `Debug`, `Fatal`, `Panic` и их форматированные варианты (`Infof`, `Errorf`, `Warnf`, `Debugf`).
 
-## Примеры ошибок
+## Примеры использования
 ``` go
 // Нарушение 1: заглавная буква
 logger.Info("User logged in")
@@ -164,28 +171,4 @@ golangci-lint custom
 ### 5. Запустить линтер
 ```bash
 ./custom-gcl run ./...
-```
-
-> Примечание:
-команда golangci-lint custom читает .custom-gcl.yml и автоматически подтягивает плагин как Go-модуль — устанавливать loglinter отдельно не нужно.
-
-## Кастомные паттерны
-
-Вы можете задать свои запрещённые слова и regexp-паттерны в `.golangci.yml`:
-
-```yaml
-linters:
-  default: none
-  enable:
-    - loglinter
-  settings:
-    custom:
-      loglinter:
-        type: module
-        description: Checks log messages.
-        settings:
-          words:
-              - "secret" #Пример
-          patterns:
-              - "credit.?card" #Пример
 ```

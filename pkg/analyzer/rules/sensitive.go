@@ -15,7 +15,6 @@ var sensitiveKeywords = []string{
 	"token",
 	"apikey",
 	"api_key",
-	"secret",
 	"private_key",
 	"auth",
 }
@@ -29,3 +28,22 @@ func CheckSensitive(pass *analysis.Pass, msg string, pos token.Pos) {
 		}
 	}
 }
+
+func CheckSensitiveWithExtra(pass *analysis.Pass, msg string, pos token.Pos, extra []string) {
+    lower := strings.ToLower(msg)
+
+    for _, keyword := range sensitiveKeywords {
+        if strings.Contains(lower, keyword) {
+            pass.Reportf(pos, "log message must not contain sensitive data (%q): %q", keyword, msg)
+            return
+        }
+    }
+
+    for _, keyword := range extra {
+        if strings.Contains(lower, strings.ToLower(keyword)) {
+            pass.Reportf(pos, "log message must not contain sensitive data (%q): %q", keyword, msg)
+            return
+        }
+    }
+}
+

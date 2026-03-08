@@ -28,6 +28,5 @@ func main() {
 	logger.Info("done ✅")
 
 	// Кастомные нарушения
-	logger.Debug("secreT")
-	logger.Error("Credit Card")
+	logger.Error("credit card")
 }

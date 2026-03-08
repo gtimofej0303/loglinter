@@ -11,6 +11,12 @@ linters:
         type: module
         description: Checks log messages.
         settings:
+          enabled: true
+          enable_lowercase:   true
+          enable_english:     true
+          enable_specchars:   true
+          enable_sensitive:   true
+          enable_custom:      true
           words:
               - "internal"
               - "secret"
