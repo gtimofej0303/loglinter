@@ -18,9 +18,9 @@ linters:
           enable_sensitive:   true
           enable_custom:      true
           words:
-              - "internal"
-              - "secret"
-              - "debug_mode"
+            - "internal"
+            - "secret"
+            - "debug_mode"
           patterns:
             - "credit.?card"
             - "social.?security"

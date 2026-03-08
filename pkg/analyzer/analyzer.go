@@ -3,10 +3,12 @@ package analyzer
 import (
 	"go/ast"
 	"go/token"
+	"strconv"
 	"strings"
+	"unicode"
 
 	"github.com/gtimofej0303/loglinter/pkg/analyzer/rules"
-	
+
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/passes/inspect"
 	"golang.org/x/tools/go/ast/inspector"
@@ -65,27 +67,84 @@ func (r *runner) run(pass *analysis.Pass) (interface{}, error){
             return
         }
 
-		msg, pos, ok := extractLogMessage(call)
+		msg, pos, lit, ok := extractLogMessage(call)
 		if !ok {
             return
         }
 
-
-        if r.cfg.EnableLowercase {
-            rules.CheckLowercase(pass, msg, pos)
+        fixed := rules.AutoFixMessage(msg)
+        if fixed == msg{
+            if r.cfg.EnableEnglish {
+                rules.CheckEnglish(pass, msg, pos)
+            }
+            if r.cfg.EnableSensitive {
+                rules.CheckSensitiveWithExtra(pass, msg, pos, r.cfg.ExtraWords)
+            }
+            if r.cfg.EnableCustom && (len(r.cfg.ExtraPatterns) > 0 || len(r.cfg.ExtraWords) > 0) {
+                rules.CheckCustom(pass, msg, pos, r.cfg.ExtraPatterns)
+            }
+            if r.cfg.EnableSpecChars {
+                rules.CheckSpecialChars(pass, msg, pos)
+            }                        
+            if r.cfg.EnableLowercase {
+                rules.CheckLowercase(pass, msg, pos)
+            }
+            
+            return
         }
+
+        newValue := strconv.Quote(fixed)
+        if r.cfg.EnableLowercase{
+            if unicode.IsUpper([]rune(msg)[0]){
+                pass.Report(analysis.Diagnostic{
+                    Pos: pos,
+                    End: lit.End(),
+                    Message: `log message must start with a lowercase letter`,
+                    SuggestedFixes: []analysis.SuggestedFix{
+                        {
+                            Message: "convert first letter to lowercase or remove special chars",
+                            TextEdits: []analysis.TextEdit{
+                                {
+                                    Pos: lit.Pos(),
+                                    End: lit.End(),
+                                    NewText: []byte(newValue),
+                                },
+                            },
+                        },
+                    },
+                })
+            }
+        }
+
+        if r.cfg.EnableSpecChars {
+            if rules.ContainsSpecialChars(msg){
+                pass.Report(analysis.Diagnostic{
+                    Pos: pos,
+                    End: lit.End(),
+                    Message: `log message must not contain special characters`,
+                    SuggestedFixes: []analysis.SuggestedFix{
+                        {
+                            Message: "remove special chars or convert first letter to lowercase",
+                            TextEdits: []analysis.TextEdit{
+                                {
+                                    Pos: lit.Pos(),
+                                    End: lit.End(),
+                                    NewText: []byte(newValue),
+                                },
+                            },
+                        },
+                    },
+                })
+            }
+        }
+
         if r.cfg.EnableEnglish {
             rules.CheckEnglish(pass, msg, pos)
-        }
-        if r.cfg.EnableSpecChars {
-            rules.CheckSpecialChars(pass, msg, pos)
         }
         if r.cfg.EnableSensitive {
             rules.CheckSensitiveWithExtra(pass, msg, pos, r.cfg.ExtraWords)
         }
-
-
-		if r.cfg.EnableCustom && (len(r.cfg.ExtraPatterns) > 0 || len(r.cfg.ExtraWords) > 0) {
+        if r.cfg.EnableCustom && (len(r.cfg.ExtraPatterns) > 0 || len(r.cfg.ExtraWords) > 0) {
             rules.CheckCustom(pass, msg, pos, r.cfg.ExtraPatterns)
         }
 	})
@@ -93,35 +152,35 @@ func (r *runner) run(pass *analysis.Pass) (interface{}, error){
 	return nil, nil
 }
 
-func extractLogMessage(call *ast.CallExpr) (string, token.Pos, bool) {
+func extractLogMessage(call *ast.CallExpr) (string, token.Pos, *ast.BasicLit, bool) {
 	sel, ok := call.Fun.(*ast.SelectorExpr)
     if !ok {
-        return "", 0, false
+        return "", 0, nil, false
     }
 
 	methodName := sel.Sel.Name
     if !isLogMethod(methodName) {
-        return "", 0, false
+        return "", 0, nil, false
     }
 
 	ident, ok := sel.X.(*ast.Ident)
     if !ok {
-        return "", 0, false
+        return "", 0, nil, false
     }
     if !loggerPkgs[ident.Name] && ident.Name != "logger" {
-        return "", 0, false
+        return "", 0, nil, false
     }
 
 	if len(call.Args) == 0 {
-        return "", 0, false
+        return "", 0, nil, false
     }
 	lit, ok := call.Args[0].(*ast.BasicLit)
     if !ok || lit.Kind != token.STRING {
-        return "", 0, false
+        return "", 0, nil, false
     }
 
 	msg := strings.Trim(lit.Value, `"`)
-    return msg, lit.Pos(), true
+    return msg, lit.Pos(), lit, true
 }
 
 func isLogMethod(name string) bool{

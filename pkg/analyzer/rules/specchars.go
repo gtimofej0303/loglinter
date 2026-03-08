@@ -8,7 +8,7 @@ import (
 	"golang.org/x/tools/go/analysis"
 )
 
-const forbidden = "!?#@$%^&*."
+const forbidden = "?!#@$%^&*."
 
 func CheckSpecialChars(pass *analysis.Pass, msg string, pos token.Pos) {
     for _, r := range msg {
@@ -22,4 +22,16 @@ func CheckSpecialChars(pass *analysis.Pass, msg string, pos token.Pos) {
             return
         }
     }
+}
+
+func ContainsSpecialChars(msg string) bool {
+	for _, r := range msg {
+		if unicode.Is(unicode.So, r) || unicode.Is(unicode.Sm, r) {
+			return true
+		}
+		if strings.ContainsRune(forbidden, r) {
+			return true
+		}
+	}
+	return false
 }

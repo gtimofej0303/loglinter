@@ -12,20 +12,21 @@ func TestCheckSensitive(t *testing.T) {
 		name    string
 		msg     string
 		wantErr bool
+		extra []string
 	}{
-		{"valid clean message", "user logged in", false},
-		{"valid db connection", "database connection established", false},
-		{"invalid password keyword", "user password reset", true},
-		{"invalid token keyword", "received token from client", true},
-		{"invalid secret keyword", "loading secret config", true},
-		{"invalid api_key keyword", "api_key not found", true},
-		{"invalid apikey keyword", "apikey validation failed", true},
-		{"invalid auth keyword", "auth failed for user", true},
-		{"invalid private_key", "private_key loaded", true},
-		{"invalid passwd", "passwd is empty", true},
-		{"invalid pass keyword", "waiting pass validation", true},
-		{"invalid uppercase keyword", "User PASSWORD reset", true},
-		{"valid word passport", "passport validation", false}, 
+		{"valid clean message", "user logged in", false, nil},
+		{"valid db connection", "database connection established", false, nil},
+		{"invalid password keyword", "user password reset", true, nil},
+		{"invalid token keyword", "received token from client", true, nil},
+		{"invalid secret keyword", "loading secret config", true, []string{"secret"}},
+		{"invalid api_key keyword", "api_key not found", true, nil},
+		{"invalid apikey keyword", "apikey validation failed", true, nil},
+		{"invalid auth keyword", "auth failed for user", true, nil},
+		{"invalid private_key", "private_key loaded", true, nil},
+		{"invalid passwd", "passwd is empty", true, nil},
+		{"invalid pass keyword", "waiting pass validation", true, nil},
+		{"invalid uppercase keyword", "User PASSWORD reset", true, nil},
+		{"valid word passport", "passport validation", false, nil}, 
 	}
 
 	for _, tc := range tests {
@@ -36,7 +37,7 @@ func TestCheckSensitive(t *testing.T) {
 					reported = true
 				},
 			}
-			CheckSensitive(pass, tc.msg, token.NoPos)
+			CheckSensitiveWithExtra(pass, tc.msg, token.NoPos, tc.extra)
 			if reported != tc.wantErr {
 				t.Errorf("checkSensitive(%q): reported=%v, want %v", tc.msg, reported, tc.wantErr)
 			}

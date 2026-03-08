@@ -19,7 +19,7 @@ var sensitiveKeywords = []string{
 	"auth",
 }
 
-func CheckSensitive(pass *analysis.Pass, msg string, pos token.Pos) {
+/*func CheckSensitive(pass *analysis.Pass, msg string, pos token.Pos) {
 	lower := strings.ToLower(msg)
 	for _, keyword := range sensitiveKeywords {
 		if strings.Contains(lower, keyword) {
@@ -27,7 +27,7 @@ func CheckSensitive(pass *analysis.Pass, msg string, pos token.Pos) {
 			return
 		}
 	}
-}
+}*/
 
 func CheckSensitiveWithExtra(pass *analysis.Pass, msg string, pos token.Pos, extra []string) {
     lower := strings.ToLower(msg)
