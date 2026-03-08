@@ -42,7 +42,7 @@ golangci-lint custom
 ## Использование
 Запуск через кастомный golangci-lint
 ```bash
-./custom-gcl run ./...
+./custom-gcl run ./... --max-same-issues=0
 ```
 
 **Конфигурация .golangci.yml**
