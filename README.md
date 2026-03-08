@@ -62,7 +62,7 @@ linters:
           enabled: true # Включение/выключение плагина
           enable_lowercase:   true # Включение/выключение правила о больших буквах
           enable_english:     true # Включение/выключение правила об английских буквах
-          enable_specchars:   true # Включение/выключение правила о спец символах
+          enable_specchars:   true # Включение/выключение правила о спецсимволах
           enable_sensitive:   true # Включение/выключение правила о чувствительных данных
           enable_custom:      true # Включение/выключение кастомных паттернов
           words: # Дополнительные чувствительные ключевые слова
@@ -131,8 +131,21 @@ go test ./pkg/analyzer/...
 
 `password`, `passwd`, `pass`, `token`, `apikey`, `api_key`, `secret`, `private_key`, `auth`
 
+В файле конфигурации есть влзможность добавить свои чувствительные ключевые слова.
+
 > Примечание:
 слово passport не считается нарушением — проверка на " pass " (с пробелами) исключает его из ложных срабатываний.
+
+## Авто-исправление
+В проекте реализовано **авто-исправление**, оно работает с двумя правилами следующим образом:
+- Если в сообщении первая буква **заглавная** - заменяет её на **строчную**.
+- Если в сообщении присутствуют **спецсимволы или эмодзи** - удаляет их, заменяя **пустой строкой**.
+
+Авто-исправление происходит прямо внутри кода. 
+Запускается авто-исправление **следующей командой**:
+```bash
+./custom-gcl run --fix ./...
+```
 
 ## Интеграция в проект
 ### 1. Установить golangci-lint
@@ -145,7 +158,7 @@ go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.10.1
 version: v2.10.1
 plugins:
   - module: 'github.com/gtimofej0303/loglinter'
-    version: v0.1.0
+    version: v0.2.0
 ```
 ### 3. Создать .golangci.yml
 ```yml
@@ -158,8 +171,22 @@ linters:
   settings:
     custom:
       loglinter:
-        type: "module"
+        type: module
         description: Checks log messages.
+        settings:
+          enabled: true
+          enable_lowercase:   true
+          enable_english:     true
+          enable_specchars:   true
+          enable_sensitive:   true
+          enable_custom:      true
+          words:
+            - "internal"
+            - "secret"
+            - "debug_mode"
+          patterns:
+            - "credit.?card"
+            - "social.?security"
 ```
 
 ### 4. Собрать кастомный бинарник golangci-lint с плагином
@@ -170,5 +197,5 @@ golangci-lint custom
 
 ### 5. Запустить линтер
 ```bash
-./custom-gcl run ./...
+./custom-gcl run ./... --max-same-issues=0
 ```
